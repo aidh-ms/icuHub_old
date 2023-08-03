@@ -40,19 +40,19 @@ def load_stay_data(stay_id: int = 34422196):
 
 st.title("Patient Dashboard")
 
-stay_data: pd.DataFrame = load_stay_data()
-vitals_data: pd.DataFrame = load_vitals_data()
-ventilation_data: pd.DataFrame = load_ventilation_data()
+stay_data: pd.DataFrame = load_stay_data(st.session_state["current_patient"])
+vitals_data: pd.DataFrame = load_vitals_data(st.session_state["current_patient"])
+ventilation_data: pd.DataFrame = load_ventilation_data(st.session_state["current_patient"])
 
 ### SEARCH FORM ###
 with st.form(key="search_form", clear_on_submit=False):
     st.write("##### Search Patient")
-    stay_id = st.number_input("Stay ID", min_value=0, max_value=99999999, value=34422196)
+    st.session_state["current_patient"] = st.number_input("Stay ID", min_value=0, max_value=99999999, value=34422196)
     submitted = st.form_submit_button("Search")
     if submitted:
-        stay_data: pd.DataFrame = load_stay_data(stay_id=stay_id)
-        vitals_data: pd.DataFrame = load_vitals_data(stay_id=stay_id)
-        ventilation_data: pd.DataFrame = load_ventilation_data(stay_id=stay_id)
+        stay_data: pd.DataFrame = load_stay_data(stay_id=st.session_state["current_patient"])
+        vitals_data: pd.DataFrame = load_vitals_data(stay_id=st.session_state["current_patient"])
+        ventilation_data: pd.DataFrame = load_ventilation_data(stay_id=st.session_state["current_patient"])
 
 st.write("## Patient Information")
 st.write(stay_data)

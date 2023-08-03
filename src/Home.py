@@ -10,3 +10,6 @@ st.write("Hello, world!")
 st.sidebar.success("Hello, User!")
 
 st.markdown("## This is a header")
+
+st.session_state["current_patient"] = 34422196
+st.session_state["current_item"] = 220045

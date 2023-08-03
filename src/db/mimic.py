@@ -25,6 +25,17 @@ def get_item_of_patient(item_ids: tuple, stay_id: int, schema: str = "mimiciv_ic
     return connector.execute_query(query)
 
 
+def get_item(item_id: int, schema: str = "mimiciv_icu", table: str = "chartevents") -> pd.DataFrame:
+    """Get all instances of an item"""
+    query: str = f"""
+    SELECT stay_id, charttime, value
+    FROM {schema}.{table}
+    WHERE itemid = {item_id}
+    """
+
+    return connector.execute_query(query)
+
+
 def get_vitalsign(stay_id: int) -> pd.DataFrame:
     """Get vitalsigns of patient"""
     query: str = f"""
