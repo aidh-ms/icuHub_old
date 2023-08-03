@@ -74,22 +74,23 @@ st.plotly_chart(fig_vitals, use_container_width=True)
 
 
 ### RESPIRATORY AND VENTILATION PARAMETERS ###
-fig_resp = go.Figure()
-
-fig_resp.add_trace(go.Scatter(x=vitals_data.index, y=vitals_data["resp_rate"], mode="markers+lines", name="Respiratory Rate", line={"color": "green"}))
-fig_resp.add_trace(go.Scatter(x=vitals_data.index, y=vitals_data["spo2"], mode="markers+lines", name="SpO2", line={"color": "blue"}))
-fig_resp.add_trace(go.Scatter(x=ventilation_data.index, y=ventilation_data["fio2"], mode="markers+lines", name="FiO2", line={"color": "lightblue"}))
-st.write("## Respiratory Parameters")
-st.plotly_chart(fig_resp, use_container_width=True)
 
 # Ventilation
-st.write("#### Ventilation Parameters")
+st.write("## Ventilation Parameters")
 if st.checkbox("Show raw ventilation data"):
     st.write(ventilation_data)
 
-vent_tab1, vent_tab2 = st.tabs(["Pressure", "Volume"])
+vent_tab1, vent_tab2, vent_tab3 = st.tabs(["Respiration", "Pressure", "Volume"])
 
 with vent_tab1:
+    fig_resp = go.Figure()
+
+    fig_resp.add_trace(go.Scatter(x=vitals_data.index, y=vitals_data["resp_rate"], mode="markers+lines", name="Respiratory Rate", line={"color": "green"}))
+    fig_resp.add_trace(go.Scatter(x=vitals_data.index, y=vitals_data["spo2"], mode="markers+lines", name="SpO2", line={"color": "blue"}))
+    fig_resp.add_trace(go.Scatter(x=ventilation_data.index, y=ventilation_data["fio2"], mode="markers+lines", name="FiO2", line={"color": "lightblue"}))
+    st.plotly_chart(fig_resp, use_container_width=True)
+
+with vent_tab2:
     fig_vent1 = go.Figure()
 
     fig_vent1.add_trace(go.Scatter(x=ventilation_data.index, y=ventilation_data["peep"], mode="markers+lines", name="PEEP", line={"color": "green"}))
@@ -98,7 +99,7 @@ with vent_tab1:
 
     st.plotly_chart(fig_vent1, use_container_width=True)
 
-with vent_tab2:
+with vent_tab3:
     fig_vent2 = go.Figure()
 
     fig_vent2.add_trace(go.Scatter(x=ventilation_data.index, y=ventilation_data["tidal_volume_observed"], mode="markers+lines", name="Tidal Volume Observed", line={"color": "green"}))
