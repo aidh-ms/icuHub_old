@@ -8,6 +8,8 @@ from db import mimic
 st.set_page_config(
     layout="wide", page_title="ICU Data Viewer", page_icon="📈")
 
+st.session_state["current_patient"] = 34422196
+
 
 @st.cache_data
 def load_vitals_data(stay_id: int = 34422196):
@@ -38,6 +40,18 @@ def load_stay_data(stay_id: int = 34422196):
     return data
 
 
+@st.cache_data
+def load_kidney_data(stay_id: int = 34422196):
+    """Load kidney data from db"""
+    urine_data, creatinine_data = mimic.get_kidney(stay_id=stay_id)
+    creatinine_data.rename(columns={"valuenum": "creatinine"}, inplace=True)
+    creatinine_data.set_index("charttime", inplace=True)
+    creatinine_data.sort_index(inplace=True)
+    urine_data.set_index("charttime", inplace=True)
+    urine_data.sort_index(inplace=True)
+    return urine_data, creatinine_data
+
+
 st.title("Patient Dashboard")
 
 stay_data: pd.DataFrame = load_stay_data(st.session_state["current_patient"])
@@ -58,7 +72,7 @@ st.write("## Patient Information")
 st.write(stay_data)
 
 
-# vital parameters
+### VITAL PARAMETERS ###
 fig_vitals = go.Figure()
 
 fig_vitals.add_trace(go.Scatter(x=vitals_data.index, y=vitals_data["heart_rate"], mode="markers+lines", name="Heart Rate", line={"color": "green"}))
@@ -107,3 +121,22 @@ with vent_tab3:
     st.plotly_chart(fig_vent2, use_container_width=True)
 
 ### KIDNEY FUNCTION ###
+st.write("## Kidney Function")
+
+urine_data, creatinine_data = load_kidney_data(st.session_state["current_patient"])
+
+if st.checkbox("Show raw kidney function data"):
+    st.write(urine_data, creatinine_data)
+
+kidney_tab1, kidney_tab2 = st.tabs(["Urine Output", "Creatinine"])
+
+with kidney_tab1:
+    fig_urine = go.Figure()
+
+    fig_urine.add_trace(go.Scatter(x=urine_data.index, y=urine_data["urineoutput"], mode="markers+lines", name="Urine Output", line={"color": "green"}))
+    st.plotly_chart(fig_urine, use_container_width=True)
+with kidney_tab2:
+    fig_creatinine = go.Figure()
+
+    fig_creatinine.add_trace(go.Scatter(x=creatinine_data.index, y=creatinine_data["creatinine"], mode="markers+lines", name="Creatinine", line={"color": "green"}))
+    st.plotly_chart(fig_creatinine, use_container_width=True)

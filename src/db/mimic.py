@@ -3,6 +3,7 @@
 
 import logging
 import pandas as pd
+from typing import LiteralString
 from db.Connector import SQLDBConnector
 from db.key import engine
 from logger import CustomLogger
@@ -67,3 +68,23 @@ def get_stay(stay_id: int) -> pd.DataFrame:
     """
 
     return connector.execute_query(query)
+
+
+def get_kidney(stay_id: int) -> pd.DataFrame:
+    """Get kidney data of patient"""
+    query_urine: LiteralString = f"""
+    SELECT charttime, urineoutput
+    FROM mimiciv_derived.urine_output
+    WHERE stay_id = {stay_id}
+    """
+    query_creatinine: LiteralString = f"""
+    SELECT l.charttime, l.valuenum
+    FROM mimiciv_hosp.labevents AS l
+    INNER JOIN mimiciv_icu.icustays AS s USING(subject_id)
+    WHERE l.itemid IN (50912, 52546)
+    AND s.stay_id = {stay_id}
+    AND l.charttime > s.intime
+    AND l.charttime < s.outtime
+    
+    """
+    return connector.execute_query(query_urine), connector.execute_query(query_creatinine)
