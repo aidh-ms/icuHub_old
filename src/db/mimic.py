@@ -14,6 +14,16 @@ logger: logging.Logger = CustomLogger().get_logger()
 connector: SQLDBConnector = SQLDBConnector(engine)
 
 
+def get_patient_stays():
+    """Get all stays of patient"""
+    query: str = """
+    SELECT *
+    FROM mimiciv_derived.icustay_detail
+    """
+
+    return connector.execute_query(query)
+
+
 def get_item_of_patient(item_ids: tuple, stay_id: int, schema: str = "mimiciv_icu", table: str = "chartevents") -> pd.DataFrame:
     """Get item of patient"""
     query: str = f"""
