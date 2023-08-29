@@ -8,11 +8,13 @@ from db import mimic
 st.set_page_config(
     layout="wide", page_title="ICU Data Viewer", page_icon="📈")
 
-st.session_state["current_patient"] = 34422196
+DEFAULT_PATIENT = 30057454
+
+st.session_state["current_patient"] = DEFAULT_PATIENT
 
 
 @st.cache_data
-def load_vitals_data(stay_id: int = 34422196):
+def load_vitals_data(stay_id: int = DEFAULT_PATIENT):
     """Load data from db"""
     data: pd.DataFrame = mimic.get_vitalsign(stay_id=stay_id)
     data = data.drop(columns=["subject_id", "stay_id"])
@@ -23,7 +25,7 @@ def load_vitals_data(stay_id: int = 34422196):
 
 
 @st.cache_data
-def load_ventilation_data(stay_id: int = 34422196):
+def load_ventilation_data(stay_id: int = DEFAULT_PATIENT):
     """Load data on ventilation from db"""
     data: pd.DataFrame = mimic.get_ventilator_setting(stay_id=stay_id)
     data = data.drop(columns=["subject_id", "stay_id"])
@@ -34,14 +36,14 @@ def load_ventilation_data(stay_id: int = 34422196):
 
 
 @st.cache_data
-def load_stay_data(stay_id: int = 34422196):
+def load_stay_data(stay_id: int = DEFAULT_PATIENT):
     """Load data on stay from db"""
     data: pd.DataFrame = mimic.get_stay(stay_id=stay_id)
     return data
 
 
 @st.cache_data
-def load_kidney_data(stay_id: int = 34422196):
+def load_kidney_data(stay_id: int = DEFAULT_PATIENT):
     """Load kidney data from db"""
     urine_data, creatinine_data = mimic.get_kidney(stay_id=stay_id)
     creatinine_data.rename(columns={"valuenum": "creatinine"}, inplace=True)
@@ -61,7 +63,7 @@ ventilation_data: pd.DataFrame = load_ventilation_data(st.session_state["current
 ### SEARCH FORM ###
 with st.form(key="search_form", clear_on_submit=False):
     st.write("##### Search Patient")
-    st.session_state["current_patient"] = st.number_input("Stay ID", min_value=0, max_value=99999999, value=34422196)
+    st.session_state["current_patient"] = st.number_input("Stay ID", min_value=0, max_value=99999999, value=DEFAULT_PATIENT)
     submitted = st.form_submit_button("Search")
     if submitted:
         stay_data: pd.DataFrame = load_stay_data(stay_id=st.session_state["current_patient"])

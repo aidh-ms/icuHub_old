@@ -5,12 +5,12 @@ import logging
 import pandas as pd
 from typing import LiteralString
 from pyICU.connection.Connector import SQLDBConnector
-from pyICU.connection.key import mimic_engine
+from pyICU.connection.key import mimic_demo_engine
 from logger import CustomLogger
 
 
 logger: logging.Logger = CustomLogger().get_logger()
-connector = SQLDBConnector(mimic_engine)
+connector = SQLDBConnector(mimic_demo_engine)
 
 
 def get_patient_stays():
@@ -80,12 +80,12 @@ def get_stay(stay_id: int) -> pd.DataFrame:
 
 def get_kidney(stay_id: int) -> pd.DataFrame:
     """Get kidney data of patient"""
-    query_urine: LiteralString = f"""
+    query_urine: str = f"""
     SELECT charttime, urineoutput
     FROM mimiciv_derived.urine_output
     WHERE stay_id = {stay_id}
     """
-    query_creatinine: LiteralString = f"""
+    query_creatinine: str = f"""
     SELECT l.charttime, l.valuenum
     FROM mimiciv_hosp.labevents AS l
     INNER JOIN mimiciv_icu.icustays AS s USING(subject_id)
@@ -93,6 +93,6 @@ def get_kidney(stay_id: int) -> pd.DataFrame:
     AND s.stay_id = {stay_id}
     AND l.charttime > s.intime
     AND l.charttime < s.outtime
-    
     """
+
     return connector.execute_query(query_urine), connector.execute_query(query_creatinine)
