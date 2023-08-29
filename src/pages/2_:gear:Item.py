@@ -42,7 +42,7 @@ if st.checkbox("Show Search Form"):
         table = st.selectbox("Table", tables[st.session_state["current_schema"]])
         submitted = st.form_submit_button("Search")
         if submitted:
-            pass
+            item_data = load_item_data(st.session_state["current_item"], st.session_state["current_schema"])
 
 item_data: pd.DataFrame = load_item_data(st.session_state["current_item"], st.session_state["current_schema"])
 
