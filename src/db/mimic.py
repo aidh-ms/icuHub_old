@@ -4,13 +4,13 @@
 import logging
 import pandas as pd
 from typing import LiteralString
-from pyICU.connection.Connector import SQLDBConnector
+from pyICU.connection.Connector import MimicConnector
 from pyICU.connection.key import mimic_demo_engine
 from logger import CustomLogger
 
 
 logger: logging.Logger = CustomLogger().get_logger()
-connector = SQLDBConnector(mimic_demo_engine)
+connector = MimicConnector(mimic_demo_engine)
 
 
 def get_patient_stays():
