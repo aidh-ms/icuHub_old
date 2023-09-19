@@ -1,9 +1,10 @@
-
+import openai
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 from db import mimic
-
+from llm import llm_openai
+from pandasai import SmartDataframe
 
 st.set_page_config(
     layout="wide", page_title="ICU Data Viewer", page_icon="📈")
@@ -60,6 +61,8 @@ stay_data: pd.DataFrame = load_stay_data(st.session_state["current_patient"])
 vitals_data: pd.DataFrame = load_vitals_data(st.session_state["current_patient"])
 ventilation_data: pd.DataFrame = load_ventilation_data(st.session_state["current_patient"])
 
+vitals_data_smart = SmartDataframe(vitals_data, config={"llm": llm_openai})
+
 ### SEARCH FORM ###
 with st.form(key="search_form", clear_on_submit=False):
     st.write("##### Search Patient")
@@ -87,7 +90,6 @@ st.write("## Vital Parameters")
 if st.checkbox("Show raw vitals data"):
     st.write(vitals_data)
 st.plotly_chart(fig_vitals, use_container_width=True)
-
 
 ### RESPIRATORY AND VENTILATION PARAMETERS ###
 
@@ -142,3 +144,34 @@ with kidney_tab2:
 
     fig_creatinine.add_trace(go.Scatter(x=creatinine_data.index, y=creatinine_data["creatinine"], mode="markers+lines", name="Creatinine", line={"color": "green"}))
     st.plotly_chart(fig_creatinine, use_container_width=True)
+
+### Chat Area ###
+
+st.write("## Chat Area")
+
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = [{
+        "role": "assistant",
+        "content": "Hi, I'm your personal assistant. How can I help you today?",
+    }]
+
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Accept user input
+prompt = st.chat_input("Type a message...")
+if prompt:
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    # Display assistant response in chat message container
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = vitals_data_smart.chat(st.session_state.messages[-1]["content"])
+        message_placeholder.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
