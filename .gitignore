@@ -1,6 +1,10 @@
 # streamlit
 .streamlit/secrets.toml
 
+# pandasai
+cache
+*/cache.db
+exports
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
