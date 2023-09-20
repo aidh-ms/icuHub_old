@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.graph_objects as go
 from db import mimic
 from llm import llm_openai
-from pandasai import SmartDataframe
+from pandasai import SmartDatalake
 
 st.set_page_config(
     layout="wide", page_title="ICU Data Viewer", page_icon="📈")
@@ -60,8 +60,6 @@ st.title("Patient Dashboard")
 stay_data: pd.DataFrame = load_stay_data(st.session_state["current_patient"])
 vitals_data: pd.DataFrame = load_vitals_data(st.session_state["current_patient"])
 ventilation_data: pd.DataFrame = load_ventilation_data(st.session_state["current_patient"])
-
-vitals_data_smart = SmartDataframe(vitals_data, config={"llm": llm_openai})
 
 ### SEARCH FORM ###
 with st.form(key="search_form", clear_on_submit=False):
@@ -146,6 +144,7 @@ with kidney_tab2:
     st.plotly_chart(fig_creatinine, use_container_width=True)
 
 ### Chat Area ###
+data_lake = SmartDatalake([stay_data, vitals_data, ventilation_data, urine_data, creatinine_data], config={"llm": llm_openai})
 
 st.write("## Chat Area")
 
@@ -172,6 +171,6 @@ if prompt:
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        full_response = vitals_data_smart.chat(st.session_state.messages[-1]["content"])
+        full_response = data_lake.chat(st.session_state.messages[-1]["content"])
         message_placeholder.markdown(full_response)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
